@@ -170,6 +170,9 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+# vscode config
+.vscode
+
 # app auto generated files
 pogovori.json
 
