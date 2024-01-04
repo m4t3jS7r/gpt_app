@@ -2,126 +2,65 @@
 
 <PogovorZaslon>:
     name: "pogovorZaslon"
-    id: "pogovorZaslon"
-
+    id: pogovorZaslon
 
     MDBoxLayout:
-        orientation: 'vertical'
+        orientation: "vertical"
     
         MDTopAppBar:
             title: "ime pogovora"
             id: pogovor_naslov
-            pos_hint: {"top": 1}
             md_bg_color: "#424242"
             specific_text_color: "#F2F2F2"
+            pos_hint: {"top": 1}
             right_action_items: 
                 [["arrow-left", lambda x: root.zamenjaj_zalon_pogovori(x), "Nazaj na pogovore"],
                 ["pencil", lambda x: root.prikazi_dialog_preimenuj(x), "Preimenuj pogovor"],
                 ["delete", lambda x: root.prikazi_dialog_zbrisi(x), "Zbrisi pogovor"]]
 
-        # RecycleView:
-        #     id: sporocila_rv
-        #     # size_hint: 1, 1
-        #     viewclass: 'Sporocilo'
-            
-        #     # elevation: 2
-        #     RecycleBoxLayout:
-
-        #         # pos_hint: {"center_x": 0, "center_y": 1}
-        #         orientation: 'vertical'
-        #         # pos_hint: {'center_x': 1,'center_y': 0.0}
-        #         size_hint: 1, None
-        #         #default_size: None, 1
-        #         default_size_hint: 1, None
-        #         height: self.minimum_height
-        #         #size: self.texture_size
-        #         padding: dp(8)
-        #         spacing: dp(16)
         MDScrollView:
             id: sporocila_sv
-            # scroll_y: 1
 
             MDBoxLayout:
                 id: sporocila_box
                 orientation: "vertical"
+                adaptive_height: True
                 padding: "8dp"
                 spacing: "4dp"
-                # spacing: "4dp"
-                # spacing: "12dp"
-                adaptive_height: True
-                        
 
-                # size_hint_y: None
-                # width: dp(144)
 
         MDBoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
+            orientation: "vertical"
             height: dp(72)
-            size_hint_x: 1
-            # size_hint_y: 0.15
             opacity: 0.75
-
-            # height: dp(5)
-            # spacing: dp(8)
-
-            MDProgressBar:
-                # size_hint: None, None
-                # size: dp(48), dp(8)
-                size_hint: 1, None
-                # height: dp(4)
-                # pos_hint: {"right": 0.9}
-                indeterminate: True
-                opacity: 0
-                visible: False
-                running_duration: 1
-                catching_duration: 1.5
+            size_hint_x: 1
+            size_hint_y: None
 
             MDBoxLayout:
-                # width: dp(12)
-                size_hint: 1, 1
                 orientation: "horizontal"
+                size_hint: 1, 1
 
                 Widget:
                     size_hint_x: 0.05
 
                 MDTextField:
                     id: vnosno_polje
-                    size_hint_min_x: 0.85
-                    # size_hint_y: 0.1
-                    pos_hint: {'center_y': 0.55}
-                    
-                    # height: self.height
-                    # size_hint_y: 1
                     mode: "rectangle"
-
-                    # multiline: True
-
-                    # scroll_x: False
-                    
-                    # active_line: False
-
                     hint_text: 'Vnesi svoje sporocilo...'
                     text_color_focus: "white"
                     line_color_focus: "lime"
                     hint_text_color_focus: "yellow"
                     hint_text_color_normal: "lightgreen"
 
+                    size_hint_min_x: 0.85
+                    pos_hint: {'center_y': 0.55}
+                    
+
                 MDIconButton:
-                    # spacing: dp(8) 
-                    # text: 'Pošlji'
-                    height: self.height
                     icon: "send-outline"
-                    pos_hint: {'center_y': 0.5}
+                    text_color: "white"
+                    height: self.height
                     size_hint_y: 0.75
                     size_hint_x: 0.10
-                    text_color: "white"
-                    # disabled: 'True'
-                    # padding: [10, 10]
+                    pos_hint: {'center_y': 0.5}
                     on_release: root.poslji_sporocilo()
-            # MDBoxLayout:
-            #     size_hint_x: 0.2
-            #     # width: dp(24)
-            #     orientation: 'vertical'
-            #     padding: dp(12)
-

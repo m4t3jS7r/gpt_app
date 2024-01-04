@@ -16,15 +16,27 @@ Prosim, povejte mi, kako sem lahko danes v pomoč?'''
 
 
 class PogovorZaslon(MDScreen):
+    """
+    razred tipa MDScreen, ki omogoci prikaz sporocil pogovora 
+    """
+
     def spremeni_pogovor(self, pogovor_id):
+        """
+        nalozi pogovor glede na pogovor_id
+
+        Parametri:
+        - pogovor_id (int): id pogovora za nalaganje
+        """
         self.pogovor = upravitelj_pogovorov.dobi_pogovor(pogovor_id)
-        # print(f'got {pogovor_id}')
-        # self.posodobi_sporocila()
 
     def posodobi_sporocila(self):
+        """
+        posodobi prikazana sporcila na pogovornem zaslonu
+        """
         sporocila_view = self.ids["sporocila_box"]
         sporocila_view.clear_widgets()
 
+        # prikazi pozdravno GUI sporocilo (pogovor je nov)
         pogovor_je_nov = self.pogovor.preveri_nov_pogovor()
         if pogovor_je_nov:
             uvodno_sporocilo = SporociloWidget(odgovor=pozdravno_sporocilo)
@@ -32,6 +44,7 @@ class PogovorZaslon(MDScreen):
             sporocila_view.add_widget(uvodno_sporocilo)
             return
 
+        # prikazi GUI sporocila (pogovor ze ima sporocila)
         for sporocilo in self.pogovor:
             sporocilo_widget = SporociloWidget(vprasanje=sporocilo.vprasanje,
                                                odgovor=sporocilo.odgovor,
@@ -40,43 +53,29 @@ class PogovorZaslon(MDScreen):
 
         sporocila_scroll = self.ids["sporocila_sv"]
         sporocila_scroll.scroll_y = 1.0
-        # if pojdi_na_vrh:
-        # print(f'{sporocilo.vprasanje} - {sporocilo.odgovor}')
-
-    # def posodobi_sporocila(self):
-    #     for Sporocilo in self.Pogovor:
-    #         self.ids["sporocila_box"].add_widget(Sporocilo)
-
-        # self.ids["sporocila_rv"].data.clear()
-        # self.ids["sporocila_rv"].refresh_from_data()
-
-        # for Sporocilo in self.Pogovor:
-        #     sporocilo = Sporocilo.to_dict()
-        #     self.ids["sporocila_rv"].data.insert(0, sporocilo)
-        #     self.ids["sporocila_rv"].refresh_from_data()
-
-        # self.ids["sporocila_rv"].data.append(mehurcek)
-        # print(self.ids["sporocila_rv"].opts)
 
     def poslji_sporocilo_gpt(self, sporocilo):
+        """
+        poslji sprocoilo (vprasanje) na GPT API in posodobi pogovor
+
+        Parametri:
+        - sporocilo (Sporocilo): objekt tipa Sporocilo (ima vprasanje, nima odgovora) 
+        """
         api_sporocila = self.pogovor.pripravi_api_sporocila()
         api_odgovor = poslji_gpt_api(api_sporocila)
         sporocilo.odgovor_se_nalaga = False
         sporocilo.odgovor = api_odgovor
-        # self.posodobi_sporocila()
-        Clock.schedule_once(lambda x: self.posodobi_sporocila(), 0)
+
+        Clock.schedule_once(lambda x: self.posodobi_sporocila(), 0.125)
 
     def poslji_sporocilo(self):
+        """
+        poslje uporabnikovo sporocilo (vprasanje) na GPT API
+        """
         vnosno_polje = self.ids["vnosno_polje"]
         vnosno_sporocilo = vnosno_polje.text.strip()
         if vnosno_sporocilo:
             vnosno_polje.text = ""
-            # chat = upravitelj_pogovorov.get_chat(self.name)
-            # chat["messages"].append({"text": message_text, "user": "User"})
-            # chat_input = chat["messages"][-1]
-            # self.update_messages()
-            # message_input.text = ""
-            # self.process_gpt_response(chat_input)
             novo_sporocilo = Sporocilo(vprasanje=vnosno_sporocilo)
             self.pogovor.dodaj_sporocilo(novo_sporocilo)
             self.posodobi_sporocila()
@@ -86,15 +85,22 @@ class PogovorZaslon(MDScreen):
             api_nit.start()
 
     def preimenuj_dialog_potrdi(self, novo_ime_pogovora):
+        """
+        nastavi ime pogovora na novo_ime_pogovora
+
+        Parametri:
+        - novo_ime_pogovora (str): novo ime pogovora
+        """
         novo_ime_pogovora = novo_ime_pogovora.strip()
         if novo_ime_pogovora:
             self.pogovor.spremeni_ime(novo_ime_pogovora)
             self.ids["pogovor_naslov"].title = self.pogovor.ime
             self.preimenuj_dialog.dismiss()
 
-        # self.Pogovor.spremeni_ime(preimenujVnosnoPolje.text)
-
     def prikazi_dialog_preimenuj(self, *args, **kwargs):
+        """
+        prikazi pojavno okno za preimenovanje pogovora
+        """
         preimenujVnosnoPolje = MDTextField(
             text=self.pogovor.ime, required=True, error_color="indianred")
         zapriGumb = MDFlatButton(
@@ -112,24 +118,24 @@ class PogovorZaslon(MDScreen):
         self.preimenuj_dialog.open()
 
     def zbrisi_dialog_potrdi(self):
+        """
+        zbrisi prikazan pogovor
+        """
         upravitelj_pogovorov.zbrisi_pogovor(self.pogovor.id)
         self.zbrisi_dialog.dismiss()
-        self.zamenjaj_zalon_pogovori()
+        self.zamenjaj_zaslon_pogovori()
 
         # prikazi sporocilo - uspesno izbrisan pogovor (na zacetnem zaslonu)
         uZ = self.parent
-        # print(uZ)
+
         zz = uZ.get_screen("zacetniZaslon")
         zz.prikazi_obvestilo(
             f'Pogovor "{self.pogovor.ime}" je bil uspešno izbrisan!')
 
-        # novo_ime_pogovora = novo_ime_pogovora.strip()
-        # if novo_ime_pogovora:
-        #     self.Pogovor.spremeni_ime(novo_ime_pogovora)
-        #     self.ids["pogovor_naslov"].title = self.Pogovor.ime
-        #     self.preimenuj_dialog.dismiss()
-
     def prikazi_dialog_zbrisi(self, *args, **kwargs):
+        """
+        prikazi pojavno okno za brisanje pogovora
+        """
         zapriGumb = MDFlatButton(
             text="Prekliči", on_release=lambda x: self.zbrisi_dialog.dismiss())
         potrdiGumb = MDFlatButton(
@@ -143,29 +149,19 @@ class PogovorZaslon(MDScreen):
 
         self.zbrisi_dialog.open()
 
-    def zamenjaj_zalon_pogovori(self, *args, **kwargs):
+    def zamenjaj_zaslon_pogovori(self, *args, **kwargs):
+        """
+        spremeni zaslon na "zacetniZaslon" (pojdi nazaj na vse pogovore)
+        """
         uZ = self.parent
         uZ.zamenjaj_zaslon("zacetniZaslon")
 
     def on_enter(self):
+        """
+        nalozi pogovor (sporocila), ko se zaslon odpre
+        """
         self.ids["pogovor_naslov"].title = self.pogovor.ime
         self.posodobi_sporocila()
-        # self.appendMsg(False, 'zdravo')
-        # for x in range(14):
-        #     text = lorem.sentence()
-        #     text1 = lorem.sentence()
-        #     novo_sporocilo = Sporocilo(text, text1)
-        #     # self.Pogovor.dodaj_sporocilo(novo_sporocilo)
-        #     self.ids["sporocila_box"].add_widget(novo_sporocilo)
-
-        # self.posodobi_sporocila()
-        # print(dir(self.Pogovor))
 
         uZ = self.parent
         uZ.zamenjaj_smer_prehoda()
-
-
-"""     def __init__(self, pn, **kwargs):
-        super().__init__(**kwargs)
-        self.name = pn
- """
