@@ -1,5 +1,4 @@
 #:include components/widgets/sporocilo.kv
-#:include components/widgets/preimenuj_dialog.kv
 
 <PogovorZaslon>:
     name: "pogovorZaslon"
@@ -24,15 +23,13 @@
 
             MDBoxLayout:
                 id: sporocila_box
-                height: self.minimum_height
-                adaptive_height: True
 
                 orientation: "vertical"
-                # size_hint_y: 0
+                height: self.minimum_height
+                adaptive_height: True
                 size_hint_x: 1
                 padding: "8dp"
                 spacing: "4dp"
-                # height: dp(10)
 
 
         MDBoxLayout:

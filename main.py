@@ -15,8 +15,6 @@ class gptApp(MDApp):
 
     def on_start(self):
         Window.softinput_mode = 'pan'
-        # Window.softinput_mode = 'below_target'
-
 
 if __name__ == "__main__":
     gptApp().run()
