@@ -1,4 +1,3 @@
-import atexit
 import json
 import time
 
@@ -84,6 +83,7 @@ class Pogovor:
         """
         # spremeni ime Pogovor objekta
         self.ime = novo_ime
+        upravitelj_pogovorov.shrani_v_db()
 
 
 class UpraviteljPogovorov:
@@ -98,16 +98,13 @@ class UpraviteljPogovorov:
         # koda se zažene, ko je ustvarjen objekt UpraviteljPogovorov
         self.pogovori = []
         self.nalozi_iz_db()
-        # ob izhodu se zažene metoda shrani_v_db
-        atexit.register(self.shrani_v_db)
 
     def shrani_v_db(self):
         """
         shrani pogovore v JSON datoteko
         """
-        if self.pogovori:
-            with open('pogovori.json', 'w') as db:
-                json.dump(self.to_dict(), db)
+        with open('pogovori.json', 'w') as db:
+            json.dump(self.to_dict(), db)
 
     def nalozi_iz_db(self):
         """
@@ -149,6 +146,7 @@ class UpraviteljPogovorov:
         """
         nov_pogovor = Pogovor()
         self.pogovori.append(nov_pogovor)
+        self.shrani_v_db()
         return nov_pogovor.id
 
     def dobi_pogovor(self, pogovor_id):
@@ -165,6 +163,7 @@ class UpraviteljPogovorov:
         """
         pogovor = self.dobi_pogovor(pogovor_id)
         self.pogovori.remove(pogovor)
+        self.shrani_v_db()
 
 
 # ustvari objekt razreda UpraviteljPogovorov

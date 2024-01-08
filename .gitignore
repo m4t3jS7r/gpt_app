@@ -178,3 +178,6 @@ pogovori.json
 
 # API key
 api_kljuc.py
+
+# apk build
+.buildozer
