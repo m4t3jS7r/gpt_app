@@ -4,8 +4,8 @@ from functools import partial
 
 from kivymd.toast import toast
 from kivymd.uix.screen import MDScreen
-from kivymd.uix.list import IconLeftWidget
 from kivymd.uix.list import OneLineIconListItem
+from kivymd.uix.list import IconLeftWidgetWithoutTouch
 
 from .pogovor import upravitelj_pogovorov
 
@@ -32,8 +32,7 @@ class ZacetniZaslon(MDScreen):
         Parametri:
         - obvestilo_text (str): sporocilo za prikaz
         """
-        toast
-        toast(obvestilo_text, duration=5)
+        toast(obvestilo_text)
 
     def prikazi_uvodno_sporocilo(self, je_vidno):
         """
@@ -70,7 +69,7 @@ class ZacetniZaslon(MDScreen):
         for pogovor in pogovori:
             on_release_fun = partial(self.prikazi_pogovor, pogovor.id)
             self.ids.pogovori_list.add_widget(OneLineIconListItem(
-                IconLeftWidget(icon="forum-outline"),
+                IconLeftWidgetWithoutTouch(icon="forum-outline"),
                 on_release=on_release_fun,
                 text=f'{pogovor.ime}'))
 
@@ -81,15 +80,15 @@ class ZacetniZaslon(MDScreen):
         self.pogovori = upravitelj_pogovorov.dobi_pogovore()
         self.prikazi_pogovore(pogovori=self.pogovori)
 
-        if len(self.pogovori) > 0:
-            self.prikazi_uvodno_sporocilo(False)
-        else:
-            self.prikazi_uvodno_sporocilo(True)
+        # zacento_stanje -> true, ko ni pogovorov
+        zacento_stanje = len(self.pogovori) == 0
+        self.prikazi_uvodno_sporocilo(zacento_stanje)
 
     def on_enter(self, *args, **kwargs):
         """
         izvrsi nalaganje pogovorov, ko se zaslon odpre
         """
         Clock.schedule_once(self.nalozi_pogovore, 0.125)
+
         uZ = self.parent
         uZ.zamenjaj_smer_prehoda()

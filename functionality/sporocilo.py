@@ -4,6 +4,7 @@ from kivy.clock import Clock
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivy.properties import StringProperty
 
+
 class SporociloWidget(MDBoxLayout):
     """
     implementacija GUI komponente za sporocilo (funkcionalnost)
@@ -31,7 +32,7 @@ class SporociloWidget(MDBoxLayout):
 
         # ce vprasanje se nima odgovora, prikazi nalaganje (nalagalne pike)
         Clock.schedule_once(self._animacija_odgovor, 0.5)
-        
+
     def _animacija_odgovor(self, *args, **kwargs):
         """
         * interna funkcija *
@@ -46,10 +47,12 @@ class SporociloWidget(MDBoxLayout):
             else:
                 self.odgovor += "."
 
+
 class Sporocilo:
     """
     implementacija razreda za sporocilo (funkcionalnost)
     """
+
     def __init__(self, vprasanje=False, odgovor=False, casovni_zig=False):
         """
         ustvari nov objekt tipa Sporocilo
@@ -80,7 +83,8 @@ class Sporocilo:
         vrne sporocilo (vprasanje & odgovor) kot seznam (GPT API oblika)
         """
         return [
-            {"role": "assistant", "content": self.odgovor or "odgovarjam v slovenščini"},
+            {"role": "assistant" if self.odgovor else "system",
+                "content": self.odgovor or "You respond in Slovenian"},
             {"role": "user", "content": self.vprasanje}
         ]
 
