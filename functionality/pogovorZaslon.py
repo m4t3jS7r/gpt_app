@@ -1,18 +1,19 @@
 import threading
 
 from kivy.clock import Clock
+from kivy.utils import platform
+
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.textfield import MDTextField
 
+
 from .api import poslji_gpt_api
 from .pogovor import upravitelj_pogovorov
 from .sporocilo import Sporocilo, SporociloWidget
 
-pozdravno_sporocilo = '''Dobrodošli v GPT aplikaciji!
-Sem GPT pomočnik, tukaj da vam pomagam.
-Prosim, povejte mi, kako sem lahko danes v pomoč?'''
+pozdravno_sporocilo = '''Dobrodošli v GPT aplikaciji! Sem vaš pomočnik GPT. Kako vam lahko danes pomagam?'''
 
 
 class PogovorZaslon(MDScreen):
@@ -29,12 +30,20 @@ class PogovorZaslon(MDScreen):
         """
         self.pogovor = upravitelj_pogovorov.dobi_pogovor(pogovor_id)
 
-    def posodobi_sporocila(self):
+    def posodobi_sporocila(self, *args, **kwargs):
         """
         posodobi prikazana sporcila na pogovornem zaslonu
         """
         sporocila_view = self.ids["sporocila_box"]
         sporocila_view.clear_widgets()
+
+        # nastavi UI elemente na zacetno stanje
+        poslji_gumb = self.ids["poslji_gumb"]
+        poslji_gumb.icon = "send-outline"
+        vnosno_polje = self.ids["vnosno_polje"]
+        vnosno_polje.text = ""
+        vnosno_polje.focus = False
+        vnosno_polje.hint_text = "Vnesi svoje sporocilo..."
 
         # prikazi pozdravno GUI sporocilo (pogovor je nov)
         pogovor_je_nov = self.pogovor.preveri_nov_pogovor()
@@ -66,56 +75,97 @@ class PogovorZaslon(MDScreen):
         sporocilo.odgovor_se_nalaga = False
         sporocilo.odgovor = api_odgovor
 
-        Clock.schedule_once(lambda x: self.posodobi_sporocila(), 0.125)
+        upravitelj_pogovorov.shrani_v_db()
+        Clock.schedule_once(self.posodobi_sporocila, 0.125)
 
-    def poslji_sporocilo(self):
+    def novo_sporocilo(self):
         """
-        poslje uporabnikovo sporocilo (vprasanje) na GPT API
+        koda se izvedo po kliku na gumb poslji (oz. preimenuj)
+            -> poslji uporabnikovo sporocilo (vprasanje) na GPT API
+            -> spremeni ime pogovora
         """
         vnosno_polje = self.ids["vnosno_polje"]
+        poslji_gumb = self.ids["poslji_gumb"]
+
         vnosno_sporocilo = vnosno_polje.text.strip()
         if vnosno_sporocilo:
-            vnosno_polje.text = ""
-            novo_sporocilo = Sporocilo(vprasanje=vnosno_sporocilo)
-            self.pogovor.dodaj_sporocilo(novo_sporocilo)
-            self.posodobi_sporocila()
+            if poslji_gumb.icon == "send-outline":
+                # vneseno sporocilo je namenjeno za GPT API
+                novo_sporocilo = Sporocilo(vprasanje=vnosno_sporocilo)
+                self.pogovor.dodaj_sporocilo(novo_sporocilo)
 
-            api_nit = threading.Thread(
-                target=self.poslji_sporocilo_gpt, args=(novo_sporocilo,))
-            api_nit.start()
+                api_nit = threading.Thread(
+                    target=self.poslji_sporocilo_gpt, args=(novo_sporocilo,))
+                api_nit.start()
+            else:
+                # vneseno sporocilo je novo ime pogovora
+                self.nastavi_ime_pogovora(vnosno_sporocilo)
 
-    def preimenuj_dialog_potrdi(self, novo_ime_pogovora):
+            Clock.schedule_once(self.posodobi_sporocila, 0.125)
+
+
+    def nastavi_ime_pogovora(self, novo_ime_pogovora):
         """
-        nastavi ime pogovora na novo_ime_pogovora
-
+        spremeni ime pogovora na novo_ime_pogovora
         Parametri:
         - novo_ime_pogovora (str): novo ime pogovora
         """
         novo_ime_pogovora = novo_ime_pogovora.strip()
+
         if novo_ime_pogovora:
             self.pogovor.spremeni_ime(novo_ime_pogovora)
             self.ids["pogovor_naslov"].title = self.pogovor.ime
-            self.preimenuj_dialog.dismiss()
 
-    def prikazi_dialog_preimenuj(self, *args, **kwargs):
+            # ce ni android, zapri dialog
+            try:
+                self.preimenuj_dialog.dismiss()
+            except AttributeError as e:
+                pass
+
+    def preimenuj_pogovor(self, *args, **kwargs):
         """
-        prikazi pojavno okno za preimenovanje pogovora
+        spremeni UI v nacin za preimenovanje pogovora
         """
-        preimenujVnosnoPolje = MDTextField(
-            text=self.pogovor.ime, required=True, error_color="indianred")
-        zapriGumb = MDFlatButton(
-            text="Prekliči", on_release=lambda x: self.preimenuj_dialog.dismiss())
-        potrdiGumb = MDFlatButton(
-            text="Potrdi", on_release=lambda x: self.preimenuj_dialog_potrdi(preimenujVnosnoPolje.text))
+        if platform == "android":
+            poslji_gumb = self.ids["poslji_gumb"]
+            poslji_gumb.icon = "check-bold"
 
-        self.preimenuj_dialog = MDDialog(
-            title="Preimenuj pogovor",
-            type="custom",
-            content_cls=preimenujVnosnoPolje,
-            buttons=[zapriGumb, potrdiGumb]
-        )
+            vnosno_polje = self.ids["vnosno_polje"]
+            vnosno_polje.hint_text = "Vnesi novo ime pogovora..."
+            vnosno_polje.text = self.pogovor.ime
+            vnosno_polje.focus = True
 
-        self.preimenuj_dialog.open()
+        else:
+            preimenujVnosnoPolje = MDTextField(
+                text=self.pogovor.ime, required=True, error_color="indianred")
+            zapriGumb = MDFlatButton(
+                text="Prekliči", on_release=lambda x: self.preimenuj_dialog.dismiss())
+            potrdiGumb = MDFlatButton(
+                text="Potrdi", on_release=lambda x: self.nastavi_ime_pogovora(preimenujVnosnoPolje.text))
+
+            self.preimenuj_dialog = MDDialog(
+                title="Preimenuj pogovor",
+                type="custom",
+                content_cls=preimenujVnosnoPolje,
+                buttons=[zapriGumb, potrdiGumb]
+            )
+
+            self.preimenuj_dialog.open()
+
+    def on_keyboard(self, focus, **kwargs):
+        """
+        spremeni UI, ko je vidna tipkovnica (android) 
+            -> zamik sporocil proti dnu zaslona 
+        """
+        if platform == "android":
+            sporocila_view = self.ids["sporocila_box"]
+
+            if focus:
+                sporocila_view.adaptive_height = False
+                sporocila_view.height = sporocila_view.height + 750
+            else:
+                sporocila_view.height = sporocila_view.height - 750
+                sporocila_view.adaptive_height = True
 
     def zbrisi_dialog_potrdi(self):
         """
