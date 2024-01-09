@@ -68,7 +68,6 @@ class Sporocilo:
         _casovni_zig = casovni_zig or time.strftime(
             "%Y.%m.%d - %H:%M", time.localtime())
         self.casovni_zig = _casovni_zig
-        pass
 
     def to_dict(self):
         """
