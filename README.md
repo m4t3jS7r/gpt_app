@@ -6,7 +6,7 @@ Fotografije aplikacije se nahajajo v demo mapi.
 
 # dokumentacija
 ## (obrrazložitev kode)
-https://matej.gitbook.io/gpt-app-1/
+https://matej.gitbook.io/gpt-app/
 
 # navodila 
 ## (namestitev in zagon aplikacije)
