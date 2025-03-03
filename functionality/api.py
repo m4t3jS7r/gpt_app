@@ -1,8 +1,8 @@
 import requests
 # API kljuc za GPT API
 
-CHATGPT_API_KLJUC = "sk-xxxxx"
-api_url = "https://api.openai.com/v1/chat/completions"
+CHATGPT_API_KLJUC = "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"
+api_url = "https://api.groq.com/openai/v1/chat/completions"
 headers = {
     "Content-Type": "application/json",
     "Authorization": f"Bearer {CHATGPT_API_KLJUC}",
@@ -13,7 +13,7 @@ def poslji_gpt_api(sporocila):
 
     try:
         data = {
-            "model": "gpt-3.5-turbo",
+            "model": "llama-3.3-70b-versatile",
             "messages": sporocila
         }
         response = requests.post(api_url, json=data, headers=headers)
