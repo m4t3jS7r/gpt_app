@@ -1,5 +1,5 @@
 # aplikacija gpt_app
-Aplikacija omogoča komunikacijo z modelom GPT podjetja OpenAI. Narejena je v obliki IM, kjer se uporabnikova sporočila pošljejo na API (pošlje se tudi zgodovina pogovora). Aplikacija omogoča tvorbo več pogovorov, kjer ima lahko vsak pogovor svoje ime. Aplikacija deluje na namiznih sistemih (npr. windows, linux) in mobilnih napravah (npr. android).
+Aplikacija omogoča komunikacijo z jezikovnimi modeli, ki jih ponuja groq API. Narejena je v obliki IM, kjer se uporabnikova sporočila pošljejo na API (pošlje se tudi zgodovina pogovora). Aplikacija omogoča tvorbo več pogovorov, kjer ima lahko vsak pogovor svoje ime. Aplikacija deluje na namiznih sistemih (npr. windows, linux) in mobilnih napravah (npr. android).
 
 # demo
 Fotografije aplikacije se nahajajo v demo mapi.
